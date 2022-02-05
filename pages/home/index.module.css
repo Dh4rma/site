@@ -1,0 +1,13 @@
+.links {
+  display: flex;
+  flex-direction: column;
+  font-size: 1.5rem;
+}
+
+.link {
+  padding: 0.5rem 0;
+}
+
+.link a:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,15 @@
+.pokemons {
+  display: flex;
+  flex-wrap: wrap;
+  word-break: break-all;
+  margin-bottom: 2rem;
+}
+
+.pokemon {
+  margin: 0.4rem;
+  cursor: pointer;
+}
+
+.pokemon:hover {
+  text-decoration: underline;
+}
