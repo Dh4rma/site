@@ -1,0 +1,17 @@
+.logo {
+  margin: 3rem;
+  animation: logo-spin infinite 20s linear;
+  height: 12rem;
+  width: 12rem;
+  pointer-events: none;
+  z-index: -100;
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

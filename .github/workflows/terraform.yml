@@ -1,0 +1,41 @@
+name: terraform
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infrastructure/terraform/*"
+      - ".github/workflows/terraform.yml"
+
+jobs:
+  main:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: hashicorp/setup-terraform@v1.2.1
+        with:
+          terraform_version: 0.15.3
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: "./infrastructure/terraform"
+
+      - name: Terraform Apply
+        id: apply
+        run: |
+          terraform apply -auto-approve \
+          -var 'bucket_name=${{ secrets.S3_BUCKET_NAME }}' \
+          -var 'region'=${{ secrets.AWS_REGION }}
+        continue-on-error: true
+        working-directory: "./infrastructure/terraform"

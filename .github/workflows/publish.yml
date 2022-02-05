@@ -1,0 +1,66 @@
+name: publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: Install node dependencies
+        run: yarn install
+
+      - name: Build production
+        run: yarn build:prod
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload statics to S3 bucket
+        run: aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }}
+
+  invalidate-cache:
+    runs-on: ubuntu-20.04
+    needs: [check-env-distribution]
+    if: needs.check-env-distribution.outputs.key == 'true'
+    steps:
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Invalidate cloudFrount
+        uses: chetan/invalidate-cloudfront-action@master
+        env:
+          DISTRIBUTION: ${{ secrets.DISTRIBUTION }}
+          PATHS: "/*"
+          AWS_REGION: "us-east-1"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  check-env-distribution:
+    runs-on: ubuntu-20.04
+    outputs:
+      key: ${{ steps.key.outputs.defined }}
+    steps:
+      - id: key
+        env:
+          DISTRIBUTION: ${{ secrets.DISTRIBUTION }}
+        if: "${{ env.DISTRIBUTION != '' }}"
+        run: echo "::set-output name=defined::true"

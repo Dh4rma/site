@@ -1,0 +1,12 @@
+.link {
+  font-size: 1.2rem;
+  text-decoration: underline;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.link-disable {
+  text-decoration: none;
+  opacity: 0.8;
+}
